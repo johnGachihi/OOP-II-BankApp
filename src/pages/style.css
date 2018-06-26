@@ -1,0 +1,27 @@
+.loginLabels{
+    -fx-font-size: 13px;
+}
+
+.blueButton{
+    -fx-background-color: #31b3ff;
+    -fx-font-size: 15;
+    -fx-pref-width: 148;
+    -fx-pref-height: 25;
+    -fx-text-fill: #FFFFFF;
+}
+
+.bankAppTitle{
+    -fx-font-size: 27px;
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+    -fx-padding: 5px;
+}
+
+.homePageButtons{
+    -fx-pref-height: 25px;
+    -fx-pref-width: 165px;
+    -fx-background-color: #31b3ff;
+    -fx-font-size: 17px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #ffffff;
+}
