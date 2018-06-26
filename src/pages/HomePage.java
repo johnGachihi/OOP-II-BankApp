@@ -12,6 +12,7 @@ import javafx.stage.Stage;
 import javafx.util.Callback;
 import javafx.util.Pair;
 import pojos.Account;
+import rmiServer.TransactionManager;
 
 import java.net.URL;
 import java.util.Optional;
@@ -26,6 +27,7 @@ public class HomePage implements StageSetter, Initializable{
     private Stage primaryStage;
     Account curAccount;
     Preferences prefs;
+    TransactionManager transactionManager;
 
     @Override
     public void setStage(Stage primaryStage) {
@@ -34,14 +36,15 @@ public class HomePage implements StageSetter, Initializable{
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        /***
-        Show user their account number using dialog
-        ***/
         prefs = Preferences.userNodeForPackage(AccountCreate.class);
         byte[] buf = prefs.getByteArray("current_account", null);
 
         curAccount = (Account) PreferencesHelper.byteToObject(buf);
         System.out.println(curAccount.getFirstName());
+        transactionManager = new TransactionManager(curAccount);
+
+        //Account number will be set in the transaction manager
+        //The below call to DBHelper will be insignificant
         curAccount.setAccNumber(DBHelper.getAccountNumber(
                 curAccount.getEncPin(), curAccount.getSalt()));
 
@@ -53,7 +56,9 @@ public class HomePage implements StageSetter, Initializable{
         Pair<String, String> pair = showDepositOrWithdrawDialog("Deposit");
         if(pair != null){
             if(Authenticator.credentialsValid(pair.getKey())){
-                setLblBalanceText(DBHelper.deposit(Float.parseFloat(pair.getValue()), curAccount.getAccNumber()));
+                //DBHelper.deposit will be replaced by:
+                // TransactionManager.makeDeposit(Float.parseFloat(pair.getValue()))
+                setLblBalanceText(transactionManager.makeDeposit(Float.parseFloat(pair.getValue())));
             } else {
                 Alert alert = new Alert(Alert.AlertType.INFORMATION);
                 alert.setTitle("Error");
@@ -67,7 +72,7 @@ public class HomePage implements StageSetter, Initializable{
         Pair<String, String> pair = showDepositOrWithdrawDialog("Withdrawal");
         if(pair != null){
             if(Authenticator.credentialsValid(pair.getKey())){
-                setLblBalanceText(DBHelper.withdraw(Float.parseFloat(pair.getValue()), curAccount.getAccNumber()));
+                setLblBalanceText(transactionManager.makeWithdrawal(Float.parseFloat(pair.getValue())));
             } else {
                 Alert alert = new Alert(Alert.AlertType.INFORMATION);
                 alert.setTitle("Error");

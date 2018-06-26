@@ -122,6 +122,40 @@ public class DBHelper {
         return getBalance(accountNo);
     }
 
+    //Will return -1 if transaction is unacceptable
+    public static float send(int senderAccNo, float amount, int receiverAccNo){
+        if(connection == null)
+            getConnection();
+
+        float balance = getBalance(senderAccNo);
+        if(!validTransaction(amount, balance))
+            return -1;
+
+        try {
+            PreparedStatement prpStmt = connection.prepareStatement(
+                    "UPDATE " + BankAppDB.TABLE_ACCOUNTS +
+                            " SET " + BankAppDB.AccountsTable.ACC_BALANCE +
+                            " = " + BankAppDB.AccountsTable.ACC_BALANCE + "+ ?" +
+                            " WHERE " + BankAppDB.AccountsTable.ACC_NUMBER + " = ?"
+            );
+            prpStmt.setFloat(1, -amount);
+            prpStmt.setFloat(2, senderAccNo);
+            prpStmt.addBatch();
+
+            prpStmt.setFloat(1, amount);
+            prpStmt.setFloat(2, receiverAccNo);
+            prpStmt.addBatch();
+
+            System.out.println(prpStmt.toString());
+
+            prpStmt.executeBatch();
+
+        } catch (SQLException e){
+            e.printStackTrace();
+        }
+        return balance - amount;
+    }
+
     private static float getBalance(int accountNo){
         float balance = -1;
         try{
@@ -151,4 +185,21 @@ public class DBHelper {
 
         alert.showAndWait();
     }
+
+    private static boolean validTransaction(float amount, float balance){
+        return amount < balance;
+    }
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
